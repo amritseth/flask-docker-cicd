@@ -27,20 +27,20 @@ jobs:
           sudo apt-get update -y
             sudo apt-get install -y git curl
 
-            # 1. Manually download the latest Docker Compose (V2) binary
-            # This fixes the "Unable to locate package" error by getting it directly from the source.
+            # 1. Install Docker Compose Manually (V2)
             sudo curl -SL https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
-
-            # 2. Make it executable so we can run it
             sudo chmod +x /usr/local/bin/docker-compose
 
-            # 3. Clean up old folder to avoid conflicts
+            # 2. THE FIX: Force kill ALL running containers to clear ports and names
+            # The '|| true' part prevents the script from crashing if no containers are running
+            sudo docker rm -f $(sudo docker ps -aq) || true
+
+            # 3. Clean up old folder
             sudo rm -rf flask-docker-cicd
 
-            # 4. Clone the repository
+            # 4. Clone fresh code
             git clone https://github.com/amritseth/flask-docker-cicd.git
             cd flask-docker-cicd
 
-            # 5. Run the app using the downloaded binary
-            # Note: We use 'docker-compose' (with a hyphen) because we installed the standalone binary
+            # 5. Start the app
             sudo docker-compose up -d --build
