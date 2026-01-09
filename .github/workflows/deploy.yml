@@ -24,23 +24,22 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         # This part runs INSIDE your AWS server automatically:
         script: |
-          # 1. Update the software list
-          sudo apt-get update -y
-          
-          # 2. Install Git if it's missing
-          sudo apt-get install -y git
+          # 1. Update and install the modern Docker Compose Plugin
+            sudo apt-get update -y
+            sudo apt-get install -y git docker-compose-plugin
 
-          # 3. Check if we already cloned the project. 
-          # If NOT, clone it. If YES, just enter the folder.
-          if [ ! -d "flask-docker-cicd" ]; then
+            # 2. Clean up conflicts
+            # Remove the old incompatible version if it exists
+            sudo apt-get remove -y docker-compose
+            # Remove the old project folder to ensure a fresh clone
+            sudo rm -rf flask-docker-cicd
+
+            # 3. Clone the repo fresh
+            # (Make sure this URL matches your repo exactly)
             git clone https://github.com/amritseth/flask-docker-cicd.git
-          fi
-          
-          cd flask-docker-cicd
-          
-          # 4. Pull the latest code from GitHub
-          git pull origin main
 
-          # 5. Stop the old container and start the new one
-          # The --build flag forces it to recreate the image with new code
-          sudo docker-compose up -d --build
+            # 4. Enter the folder
+            cd flask-docker-cicd
+
+            # 5. Start the app using the NEW command (no hyphen)
+            sudo docker compose up -d --build
