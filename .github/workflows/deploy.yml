@@ -24,22 +24,23 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         # This part runs INSIDE your AWS server automatically:
         script: |
-          # 1. Update and install the modern Docker Compose Plugin
-            sudo apt-get update -y
-            sudo apt-get install -y git docker-compose-plugin
+          sudo apt-get update -y
+            sudo apt-get install -y git curl
 
-            # 2. Clean up conflicts
-            # Remove the old incompatible version if it exists
-            sudo apt-get remove -y docker-compose
-            # Remove the old project folder to ensure a fresh clone
+            # 1. Manually download the latest Docker Compose (V2) binary
+            # This fixes the "Unable to locate package" error by getting it directly from the source.
+            sudo curl -SL https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+
+            # 2. Make it executable so we can run it
+            sudo chmod +x /usr/local/bin/docker-compose
+
+            # 3. Clean up old folder to avoid conflicts
             sudo rm -rf flask-docker-cicd
 
-            # 3. Clone the repo fresh
-            # (Make sure this URL matches your repo exactly)
+            # 4. Clone the repository
             git clone https://github.com/amritseth/flask-docker-cicd.git
-
-            # 4. Enter the folder
             cd flask-docker-cicd
 
-            # 5. Start the app using the NEW command (no hyphen)
-            sudo docker compose up -d --build
+            # 5. Run the app using the downloaded binary
+            # Note: We use 'docker-compose' (with a hyphen) because we installed the standalone binary
+            sudo docker-compose up -d --build
