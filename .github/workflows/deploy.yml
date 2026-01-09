@@ -1,0 +1,46 @@
+name: Deploy to AWS
+
+# Trigger this action only when we push to the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: GitHub checks out your code to see what changed
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Step 2: GitHub logs into your EC2 server using the secrets you saved
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        # This part runs INSIDE your AWS server automatically:
+        script: |
+          # 1. Update the software list
+          sudo apt-get update -y
+          
+          # 2. Install Git if it's missing
+          sudo apt-get install -y git
+
+          # 3. Check if we already cloned the project. 
+          # If NOT, clone it. If YES, just enter the folder.
+          if [ ! -d "flask-cicd-project" ]; then
+            git clone https://github.com/YOUR_GITHUB_USERNAME/flask-cicd-project.git
+          fi
+          
+          cd flask-cicd-project
+          
+          # 4. Pull the latest code from GitHub
+          git pull origin main
+
+          # 5. Stop the old container and start the new one
+          # The --build flag forces it to recreate the image with new code
+          sudo docker-compose up -d --build
