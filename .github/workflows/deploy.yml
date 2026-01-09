@@ -32,11 +32,11 @@ jobs:
 
           # 3. Check if we already cloned the project. 
           # If NOT, clone it. If YES, just enter the folder.
-          if [ ! -d "flask-cicd-project" ]; then
+          if [ ! -d "flask-docker-cicd" ]; then
             git clone https://github.com/amritseth/flask-docker-cicd.git
           fi
           
-          cd flask-cicd-project
+          cd flask-docker-cicd
           
           # 4. Pull the latest code from GitHub
           git pull origin main
