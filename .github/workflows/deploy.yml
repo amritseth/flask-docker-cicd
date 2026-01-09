@@ -33,7 +33,7 @@ jobs:
           # 3. Check if we already cloned the project. 
           # If NOT, clone it. If YES, just enter the folder.
           if [ ! -d "flask-cicd-project" ]; then
-            git clone https://github.com/YOUR_GITHUB_USERNAME/flask-cicd-project.git
+            git clone https://github.com/amritseth/flask-cicd-project.git
           fi
           
           cd flask-cicd-project
